@@ -10,6 +10,11 @@ on:
         default: "jox-nightly"
         type: string
 
+# El GITHUB_TOKEN de los repos nuevos es de solo lectura: sin esto el paso
+# "Publish Release" falla con "Too many retries".
+permissions:
+  contents: write
+
 env:
   SCITER_RUST_VERSION: "1.75"
   RUST_VERSION: "1.75"
