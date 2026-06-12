@@ -250,17 +250,18 @@ class ColorThemeExtension extends ThemeExtension<ColorThemeExtension> {
 class MyTheme {
   MyTheme._();
 
+  // Marca Jox: dorado #D9A400 (acento) / #FFD400 (vivo) sobre navy #141926.
   static const Color grayBg = Color(0xFFEFEFF2);
-  static const Color accent = Color(0xFF0071FF);
-  static const Color accent50 = Color(0x770071FF);
-  static const Color accent80 = Color(0xAA0071FF);
+  static const Color accent = Color(0xFFD9A400);
+  static const Color accent50 = Color(0x77D9A400);
+  static const Color accent80 = Color(0xAAD9A400);
   static const Color canvasColor = Color(0xFF212121);
   static const Color border = Color(0xFFCCCCCC);
-  static const Color idColor = Color(0xFF00B6F0);
+  static const Color idColor = Color(0xFFD9A400);
   static const Color darkGray = Color.fromARGB(255, 148, 148, 148);
   static const Color cmIdColor = Color(0xFF21790B);
   static const Color dark = Colors.black87;
-  static const Color button = Color(0xFF2C8CFF);
+  static const Color button = Color(0xFFD9A400);
   static const Color hoverBorder = Color(0xFF999999);
 
   // ListTile
@@ -432,6 +433,8 @@ class MyTheme {
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
         backgroundColor: MyTheme.accent,
+        // Texto navy sobre dorado (marca Jox): mejor contraste que blanco.
+        foregroundColor: const Color(0xFF141926),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8.0),
         ),
@@ -535,7 +538,7 @@ class MyTheme {
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
         backgroundColor: MyTheme.accent,
-        foregroundColor: Colors.white,
+        foregroundColor: const Color(0xFF141926),
         disabledForegroundColor: Colors.white70,
         disabledBackgroundColor: Colors.white10,
         shape: RoundedRectangleBorder(
@@ -3690,9 +3693,10 @@ Color? disabledTextColor(BuildContext context, bool enabled) {
 }
 
 Widget loadPowered(BuildContext context) {
-  if (bind.mainGetBuildinOption(key: "hide-powered-by-me") == 'Y') {
-    return SizedBox.shrink();
-  }
+  // Marca Jox: sin "Con tecnología de RustDesk" en la UI (la atribución
+  // AGPL queda en el repo público y las licencias).
+  return SizedBox.shrink();
+  // ignore: dead_code
   return MouseRegion(
     cursor: SystemMouseCursors.click,
     child: GestureDetector(
