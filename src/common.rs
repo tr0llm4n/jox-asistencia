@@ -2124,11 +2124,14 @@ fn load_jox_incoming_flag() {
     #[cfg(target_os = "macos")]
     let dir = dir.join("../Resources");
     if dir.join("jox-incoming").is_file() {
-        config::HARD_SETTINGS
-            .write()
-            .unwrap()
-            .insert("conn-type".to_owned(), "incoming".to_owned());
-        log::info!("Jox: modo solo-entrante activado (jox-incoming)");
+        let mut hs = config::HARD_SETTINGS.write().unwrap();
+        // Solo-entrante: la ventana solo muestra el ID/contraseña del cliente.
+        hs.insert("conn-type".to_owned(), "incoming".to_owned());
+        // Sin botón "Instalar" ni aviso de UAC: el portable de asistencia es de un
+        // solo uso; el cliente NO debe instalar (dejaría software permanente y
+        // perdería el modo solo-entrante, que no se copia al instalar).
+        hs.insert("disable-installation".to_owned(), "Y".to_owned());
+        log::info!("Jox: modo solo-entrante + sin instalación (jox-incoming)");
     }
 }
 
