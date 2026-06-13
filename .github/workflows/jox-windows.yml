@@ -180,12 +180,22 @@ jobs:
         shell: bash
         run: |
           sed -i '/dpiAware/d' res/manifest.xml
+          pip3 install -r ./libs/portable/requirements.txt
+          mkdir -p ./SignOutput
+
+          # 1) Portable NORMAL (técnico/agente): conexión saliente + entrante.
           pushd ./libs/portable
-          pip3 install -r requirements.txt
           python3 ./generate.py -f ../../rustdesk/ -o . -e ../../rustdesk/rustdesk.exe
           popd
-          mkdir -p ./SignOutput
           mv ./target/release/rustdesk-portable-packer.exe ./SignOutput/JoxAsistencia-${{ env.VERSION }}-${{ matrix.job.arch }}.exe
+
+          # 2) Portable CLIENTE (asistencia puntual): bandera jox-incoming → la ventana
+          #    solo muestra el ID/contraseña del cliente, sin panel de control remoto.
+          touch ./rustdesk/jox-incoming
+          pushd ./libs/portable
+          python3 ./generate.py -f ../../rustdesk/ -o . -e ../../rustdesk/rustdesk.exe
+          popd
+          mv ./target/release/rustdesk-portable-packer.exe ./SignOutput/JoxAsistencia-cliente-${{ env.VERSION }}-${{ matrix.job.arch }}.exe
 
       - name: Upload portable exe
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

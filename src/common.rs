@@ -2085,6 +2085,14 @@ pub fn rustdesk_interval(i: Interval) -> ThrottledInterval {
 }
 
 pub fn load_custom_client() {
+    // Marca Jox: bandera plana propia (sin firma) para el portable del CLIENTE final.
+    // Si junto al exe hay un fichero `jox-incoming`, el cliente arranca en modo
+    // "solo entrante" (conn-type=incoming): la ventana muestra únicamente su ID y
+    // contraseña, sin el panel de "Controlar escritorio remoto". El cliente nunca
+    // controla a nadie; solo nosotros conectamos a él. El portable del técnico/agente
+    // NO lleva esta bandera, así que conservan la conexión saliente (--connect).
+    load_jox_incoming_flag();
+
     #[cfg(debug_assertions)]
     if let Ok(data) = std::fs::read_to_string("./custom.txt") {
         read_custom_client(data.trim());
@@ -2103,6 +2111,24 @@ pub fn load_custom_client() {
             return;
         };
         read_custom_client(&data.trim());
+    }
+}
+
+// Activa el modo solo-entrante si existe el fichero-bandera `jox-incoming` junto al
+// ejecutable (lo lleva embebido únicamente el portable del cliente final).
+fn load_jox_incoming_flag() {
+    let Some(dir) = std::env::current_exe().ok().and_then(|x| x.parent().map(|p| p.to_path_buf()))
+    else {
+        return;
+    };
+    #[cfg(target_os = "macos")]
+    let dir = dir.join("../Resources");
+    if dir.join("jox-incoming").is_file() {
+        config::HARD_SETTINGS
+            .write()
+            .unwrap()
+            .insert("conn-type".to_owned(), "incoming".to_owned());
+        log::info!("Jox: modo solo-entrante activado (jox-incoming)");
     }
 }
 
