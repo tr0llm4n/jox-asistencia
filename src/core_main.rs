@@ -455,6 +455,32 @@ pub fn core_main() -> Option<Vec<String>> {
                 }
             }
             return None;
+        } else if args[0] == "--password-stdin" {
+            // Marca Jox: igual que --password pero leyendo la contraseña de STDIN, para
+            // que NO quede visible en la lista de procesos del equipo (el agente la fija
+            // así en modo desatendido). Una línea por stdin = la contraseña.
+            if is_cli_setting_change_disabled()
+                || config::Config::is_disable_change_permanent_password()
+            {
+                println!("Settings are disabled!");
+                return None;
+            }
+            let mut pw = String::new();
+            use std::io::Read;
+            let _ = std::io::stdin().read_to_string(&mut pw);
+            let pw = pw.trim().to_owned();
+            if !pw.is_empty() {
+                if crate::platform::is_installed() && is_root() {
+                    if let Err(err) = crate::ipc::set_permanent_password(pw) {
+                        println!("{err}");
+                    } else {
+                        println!("Done!");
+                    }
+                } else {
+                    println!("Installation and administrative privileges required!");
+                }
+            }
+            return None;
         } else if args[0] == "--set-unlock-pin" {
             if config::Config::is_disable_unlock_pin() {
                 println!("Unlock PIN is disabled!");
@@ -918,6 +944,7 @@ fn is_user_main_ipc_scope_cli_command(args: &[String]) -> bool {
     matches!(
         args.first().map(String::as_str),
         Some("--password")
+            | Some("--password-stdin")
             | Some("--set-unlock-pin")
             | Some("--get-id")
             | Some("--set-id")
