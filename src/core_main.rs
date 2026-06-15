@@ -892,6 +892,17 @@ fn core_main_invoke_new_connection(mut args: std::env::Args) -> Option<Vec<Strin
 
     #[cfg(windows)]
     {
+        // Multi-conexión simultánea: preferimos el IPC propio de RustDesk (igual que macOS).
+        // La instancia viva escucha en el IPC "_url" (main_start_ipc_url_server) y enruta el
+        // enlace a handleUriLink → newRemoteDesktop, EXACTAMENTE la misma vía que el botón "+".
+        // Es robusto: no depende del plugin uni_links_desktop ni de localizar la ventana por
+        // título (FindWindowW), que es lo que fallaba al abrir la 2ª conexión y posteriores.
+        if crate::ipc::send_url_scheme(uni_links.clone()).is_ok() {
+            return None;
+        }
+        // Sin instancia viva escuchando (p. ej. primera conexión): caemos al mensaje de
+        // ventana de siempre; y si tampoco hay ventana, devolvemos Some para arrancar una
+        // instancia propia que abra el enlace con sus boot-args.
         use winapi::um::winuser::WM_USER;
         let res = crate::platform::send_message_to_hnwd(
             &crate::platform::FLUTTER_RUNNER_WIN32_WINDOW_CLASS,

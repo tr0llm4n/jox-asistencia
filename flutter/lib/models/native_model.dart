@@ -146,8 +146,11 @@ class PlatformFFI {
           // Start a dbus service for uri links, no need to await
           _ffiBind.mainStartDbusServer();
         }
-      } else if (isMacOS && isMain) {
+      } else if ((isMacOS || isWindows) && isMain) {
         // Start ipc service for uri links.
+        // Windows: imprescindible para multi-conexión simultánea — la instancia viva
+        // recibe cada nuevo --connect por este IPC propio (no por el frágil mensaje de
+        // ventana del plugin uni_links_desktop). Ver core_main_invoke_new_connection.
         _ffiBind.mainStartIpcUrlServer();
       }
       _startListenEvent(_ffiBind); // global event
